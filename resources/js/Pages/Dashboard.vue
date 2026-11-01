@@ -1,30 +1,31 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3'
+import { Package, Boxes, ShoppingCart, Truck, TriangleAlert } from 'lucide-vue-next'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import StatCard from '@/Components/StatCard.vue'
+import StatusBadge from '@/Components/StatusBadge.vue'
 </script>
 
 <template>
-    <Head title="Dashboard" />
+  <Head title="Tableau de bord" />
+  <AppLayout>
+    <h1 class="text-3xl font-bold text-blue-950">Tableau de bord</h1>
+    <p class="mb-6 text-slate-500">Voici un aperçu de l'activité de votre entreprise.</p>
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Dashboard
-            </h2>
-        </template>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <StatCard title="Articles" :value="124" subtitle="au catalogue" :icon="Package" color="blue" />
+      <StatCard title="Stock total" :value="18450" subtitle="unités" :icon="Boxes" color="green" />
+      <StatCard title="Commandes en cours" :value="5" subtitle="clients" :icon="ShoppingCart" color="blue" />
+      <StatCard title="Livraisons en cours" :value="3" subtitle="en cours" :icon="Truck" color="blue" />
+      <StatCard title="Stock faible" :value="8" subtitle="articles" :icon="TriangleAlert" color="red" />
+    </div>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
-                        You're logged in!
-                    </div>
-                </div>
-            </div>
-        </div>
-    </AuthenticatedLayout>
+    <div class="mt-6 flex gap-2">
+      <StatusBadge label="Entrée" type="success" />
+      <StatusBadge label="Sortie" type="danger" />
+      <StatusBadge label="Faible" type="warning" />
+      <StatusBadge label="En cours" type="info" />
+      <StatusBadge label="Planifiée" type="purple" />
+    </div>
+  </AppLayout>
 </template>
