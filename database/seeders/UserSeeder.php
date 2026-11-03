@@ -19,16 +19,14 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($comptes as $c) {
-            User::updateOrCreate(
-                ['email' => $c['email']],
-                [
-                    'name' => $c['name'],
-                    'password' => Hash::make('password'),
-                    'role_id' => Role::where('code', $c['role'])->value('id'),
-                    'actif' => true,
-                    'email_verified_at' => now(),
-                ]
-            );
-        }
+    $user = User::firstOrNew(['email' => $c['email']]);
+    $user->forceFill([
+        'name' => $c['name'],
+        'password' => Hash::make(env('SEED_PASSWORD', 'BatiStock#2026')),
+        'role_id' => Role::where('code', $c['role'])->value('id'),
+        'actif' => true,
+        'email_verified_at' => now(),
+    ])->save();
+}
     }
 }

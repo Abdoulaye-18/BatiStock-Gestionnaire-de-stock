@@ -8,19 +8,23 @@ import {
 
 const user = computed(() => usePage().props.auth.user)
 
-// Menu du MVP : les routes seront créées au fil des étapes
+const all = ['admin', 'gestionnaire', 'chantier', 'controle']
+const lecture = ['admin', 'gestionnaire', 'controle']
+
 const menu = [
-  { label: 'Tableau de bord', route: 'dashboard', icon: LayoutDashboard },
-  { label: 'Articles', route: 'articles.index', icon: Package },
-  { label: 'Stocks', route: 'stocks.index', icon: Boxes },
-  { label: 'Mouvements', route: 'mouvements.index', icon: ArrowLeftRight },
-  { label: 'Fournisseurs', route: 'fournisseurs.index', icon: Factory },
-  { label: 'Clients', route: 'clients.index', icon: Users },
-  { label: 'Chantiers', route: 'chantiers.index', icon: HardHat },
-  { label: 'Commandes', route: 'commandes.index', icon: ClipboardList },
-  { label: 'Livraisons', route: 'livraisons.index', icon: Truck },
-  { label: 'Utilisateurs', route: 'users.index', icon: UserCog },
+  { label: 'Tableau de bord', route: 'dashboard', icon: LayoutDashboard, roles: all },
+  { label: 'Articles', route: 'articles.index', icon: Package, roles: lecture },
+  { label: 'Stocks', route: 'stocks.index', icon: Boxes, roles: lecture },
+  { label: 'Mouvements', route: 'mouvements.index', icon: ArrowLeftRight, roles: lecture },
+  { label: 'Fournisseurs', route: 'fournisseurs.index', icon: Factory, roles: ['admin', 'gestionnaire'] },
+  { label: 'Clients', route: 'clients.index', icon: Users, roles: lecture },
+  { label: 'Chantiers', route: 'chantiers.index', icon: HardHat, roles: all },
+  { label: 'Commandes', route: 'commandes.index', icon: ClipboardList, roles: lecture },
+  { label: 'Livraisons', route: 'livraisons.index', icon: Truck, roles: lecture },
+  { label: 'Utilisateurs', route: 'users.index', icon: UserCog, roles: ['admin'] },
 ]
+
+const visibleMenu = computed(() => menu.filter((m) => m.roles.includes(user.value.role)))
 
 const href = (item) => (route().has(item.route) ? route(item.route) : '#')
 const isActive = (item) => route().has(item.route) && route().current(item.route.replace('.index', '.*'))
@@ -45,7 +49,7 @@ const isActive = (item) => route().has(item.route) && route().current(item.route
 
       <nav class="flex-1 space-y-1 overflow-y-auto">
         <Link
-          v-for="item in menu"
+          v-for="item in visibleMenu"
           :key="item.label"
           :href="href(item)"
           class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition"
