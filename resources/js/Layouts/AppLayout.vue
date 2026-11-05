@@ -4,16 +4,21 @@ import { Link, usePage } from '@inertiajs/vue3'
 import {
   LayoutDashboard, Package, Boxes, ArrowLeftRight, Factory, Users,
   HardHat, ClipboardList, Truck, UserCog, LogOut, Search, Bell, Box,
+  Tags, Warehouse,
 } from 'lucide-vue-next'
 
 const user = computed(() => usePage().props.auth.user)
 
 const all = ['admin', 'gestionnaire', 'chantier', 'controle']
 const lecture = ['admin', 'gestionnaire', 'controle']
+const flash = computed(() => usePage().props.flash ?? {})
+const errors = computed(() => usePage().props.errors ?? {})
 
 const menu = [
   { label: 'Tableau de bord', route: 'dashboard', icon: LayoutDashboard, roles: all },
   { label: 'Articles', route: 'articles.index', icon: Package, roles: lecture },
+  { label: 'Catégories', route: 'categories.index', icon: Tags, roles: lecture },
+  { label: 'Dépôts', route: 'entrepots.index', icon: Warehouse, roles: lecture },
   { label: 'Stocks', route: 'stocks.index', icon: Boxes, roles: lecture },
   { label: 'Mouvements', route: 'mouvements.index', icon: ArrowLeftRight, roles: lecture },
   { label: 'Fournisseurs', route: 'fournisseurs.index', icon: Factory, roles: ['admin', 'gestionnaire'] },
@@ -95,6 +100,12 @@ const isActive = (item) => route().has(item.route) && route().current(item.route
       </header>
 
       <main class="px-8 pb-10">
+        <div v-if="flash.success" class="mb-4 rounded-xl bg-emerald-100 px-4 py-3 text-sm text-emerald-800">
+  {{ flash.success }}
+</div>
+<div v-if="errors.suppression" class="mb-4 rounded-xl bg-red-100 px-4 py-3 text-sm text-red-800">
+  {{ errors.suppression }}
+</div>
         <slot />
       </main>
     </div>

@@ -4,6 +4,11 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategorieController;
+use App\Http\Controllers\EntrepotController;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\StockController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -19,15 +24,24 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
 
     // Lecture : gestionnaire, contrôle, admin
     Route::middleware('role:admin,gestionnaire,controle')->group(function () {
-        // Route::get('/articles', ...)
-        // Route::get('/mouvements', ...)
-    });
+    Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
+    Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
+    Route::get('/categories', [CategorieController::class, 'index'])->name('categories.index');
+    Route::get('/entrepots', [EntrepotController::class, 'index'])->name('entrepots.index');
+});
 
     // Écriture sur le stock : gestionnaire, admin
     Route::middleware('role:admin,gestionnaire')->group(function () {
-        // Route::post('/articles', ...)
-        // Route::post('/mouvements/sortie', ...)
-    });
+    Route::resource('articles', ArticleController::class)->only(['store', 'update']);
+    Route::patch('/articles/{article}/statut', [ArticleController::class, 'toggle'])->name('articles.toggle');
+
+    Route::resource('categories', CategorieController::class)
+        ->only(['store', 'update', 'destroy'])
+        ->parameters(['categories' => 'categorie']);
+
+    Route::resource('entrepots', EntrepotController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'store', 'update', 'destroy']);
+});
 
     // Administration
     Route::middleware('role:admin')->group(function () {
