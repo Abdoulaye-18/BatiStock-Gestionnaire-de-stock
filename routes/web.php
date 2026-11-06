@@ -9,6 +9,7 @@ use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\EntrepotController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\MouvementController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
     Route::get('/categories', [CategorieController::class, 'index'])->name('categories.index');
     Route::get('/entrepots', [EntrepotController::class, 'index'])->name('entrepots.index');
+    Route::get('/mouvements', [MouvementController::class, 'index'])->name('mouvements.index');
 });
 
     // Écriture sur le stock : gestionnaire, admin
@@ -41,6 +43,10 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
 
     Route::resource('entrepots', EntrepotController::class)->only(['store', 'update', 'destroy']);
     Route::resource('fournisseurs', FournisseurController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::post('/mouvements/entree', [MouvementController::class, 'entree'])->name('mouvements.entree');
+    Route::post('/mouvements/sortie', [MouvementController::class, 'sortie'])->name('mouvements.sortie');
+    Route::post('/mouvements/ajustement', [MouvementController::class, 'ajustement'])->name('mouvements.ajustement');
+    Route::post('/mouvements/transfert', [MouvementController::class, 'transfert'])->name('mouvements.transfert');
 });
 
     // Administration

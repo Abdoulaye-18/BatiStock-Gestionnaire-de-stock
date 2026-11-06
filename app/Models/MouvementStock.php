@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MouvementStock extends Model
 {
@@ -20,5 +21,20 @@ class MouvementStock extends Model
         static::updating(fn () => throw new \LogicException('Un mouvement validé ne peut pas être modifié.'));
         static::deleting(fn () => throw new \LogicException('Un mouvement validé ne peut pas être supprimé.'));
     }
+
+    public function stock(): BelongsTo
+{
+    return $this->belongsTo(StockArticle::class, 'stock_article_id');
+}
+
+public function user(): BelongsTo
+{
+    return $this->belongsTo(User::class);
+}
+
+public function fournisseur(): BelongsTo
+{
+    return $this->belongsTo(Fournisseur::class);
+}
 }
 
