@@ -9,18 +9,23 @@ import InputError from '@/Components/InputError.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import SecondaryButton from '@/Components/SecondaryButton.vue'
 
+// fields : [{ key, label, type?: 'select', options?: [{value,label}], default?, display?, required? }]
 const props = defineProps({
   title: String,
   subtitle: String,
-  base: String, // ex. 'categories' : sert à construire categories.store, etc.
+  base: String,
   rows: Array,
-  fields: Array, // [{ key, label }]
+  fields: Array,
   canEdit: Boolean,
+  canCreate: { type: Boolean, default: null },
+  canDelete: { type: Boolean, default: true },
 })
+
+const peutCreer = props.canCreate ?? props.canEdit
 
 const show = ref(false)
 const editing = ref(null)
-const form = useForm(Object.fromEntries(props.fields.map((f) => [f.key, ''])))
+const form = useForm(Object.fromEntries(props.fields.map((f) => [f.key, f.default ?? ''])))
 
 function openCreate() {
   editing.value = null
@@ -56,7 +61,7 @@ function remove(row) {
       <h1 class="text-3xl font-bold text-blue-950">{{ title }}</h1>
       <p class="text-slate-500">{{ subtitle }}</p>
     </div>
-    <button v-if="canEdit" @click="openCreate"
+    <button v-if="peutCreer" @click="openCreate"
       class="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
       <Plus :size="16" /> Nouveau
     </button>
@@ -72,11 +77,11 @@ function remove(row) {
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="row.id" class="border-t border-slate-100">
-          <td v-for="f in fields" :key="f.key" class="px-3 py-3">{{ row[f.key] || '-' }}</td>
+          <td v-for="f in fields" :key="f.key" class="px-3 py-3">{{ row[f.display ?? f.key] || '-' }}</td>
           <td v-if="canEdit" class="px-3 py-3">
             <div class="flex justify-end gap-3 text-slate-500">
               <button @click="openEdit(row)" class="hover:text-blue-600"><Pencil :size="16" /></button>
-              <button @click="remove(row)" class="hover:text-red-600"><Trash2 :size="16" /></button>
+              <button v-if="canDelete" @click="remove(row)" class="hover:text-red-600"><Trash2 :size="16" /></button>
             </div>
           </td>
         </tr>
@@ -92,7 +97,12 @@ function remove(row) {
       <h2 class="text-lg font-semibold text-blue-950">{{ editing ? 'Modifier' : 'Nouveau' }}</h2>
       <div v-for="f in fields" :key="f.key">
         <InputLabel :for="f.key" :value="f.label" />
-        <TextInput :id="f.key" v-model="form[f.key]" class="mt-1 block w-full" />
+        <select v-if="f.type === 'select'" :id="f.key" v-model="form[f.key]"
+          class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm">
+          <option v-if="!f.required" value="">Aucun</option>
+          <option v-for="o in f.options" :key="o.value" :value="o.value">{{ o.label }}</option>
+        </select>
+        <TextInput v-else :id="f.key" v-model="form[f.key]" class="mt-1 block w-full" />
         <InputError class="mt-1" :message="form.errors[f.key]" />
       </div>
       <div class="flex justify-end gap-3 pt-2">

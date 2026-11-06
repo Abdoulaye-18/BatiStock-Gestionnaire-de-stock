@@ -10,6 +10,8 @@ use App\Http\Controllers\EntrepotController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\MouvementController;
+use App\Http\Controllers\ChantierController;
+use App\Http\Controllers\ClientController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -22,7 +24,12 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,controle'])->group(function () {
 
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+    Route::get('/chantiers', [ChantierController::class, 'index'])->name('chantiers.index');
 
+    Route::middleware('role:admin,gestionnaire,chantier')->group(function () {
+    Route::post('/chantiers', [ChantierController::class, 'store'])->name('chantiers.store');
+    Route::put('/chantiers/{chantier}', [ChantierController::class, 'update'])->name('chantiers.update');
+});
     // Lecture : gestionnaire, contrôle, admin
     Route::middleware('role:admin,gestionnaire,controle')->group(function () {
     Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
@@ -30,6 +37,7 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::get('/categories', [CategorieController::class, 'index'])->name('categories.index');
     Route::get('/entrepots', [EntrepotController::class, 'index'])->name('entrepots.index');
     Route::get('/mouvements', [MouvementController::class, 'index'])->name('mouvements.index');
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
 });
 
     // Écriture sur le stock : gestionnaire, admin
@@ -47,6 +55,8 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::post('/mouvements/sortie', [MouvementController::class, 'sortie'])->name('mouvements.sortie');
     Route::post('/mouvements/ajustement', [MouvementController::class, 'ajustement'])->name('mouvements.ajustement');
     Route::post('/mouvements/transfert', [MouvementController::class, 'transfert'])->name('mouvements.transfert');
+    Route::resource('clients', ClientController::class)->only(['store', 'update', 'destroy']);
+    Route::delete('/chantiers/{chantier}', [ChantierController::class, 'destroy'])->name('chantiers.destroy');
 });
 
     // Administration
