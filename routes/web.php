@@ -13,6 +13,7 @@ use App\Http\Controllers\MouvementController;
 use App\Http\Controllers\ChantierController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DemandeController;
+use App\Http\Controllers\CommandeController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -40,6 +41,7 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::get('/entrepots', [EntrepotController::class, 'index'])->name('entrepots.index');
     Route::get('/mouvements', [MouvementController::class, 'index'])->name('mouvements.index');
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::get('/commandes', [CommandeController::class, 'index'])->name('commandes.index');
 });
 
     // Écriture sur le stock : gestionnaire, admin
@@ -59,6 +61,11 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::post('/mouvements/transfert', [MouvementController::class, 'transfert'])->name('mouvements.transfert');
     Route::resource('clients', ClientController::class)->only(['store', 'update', 'destroy']);
     Route::delete('/chantiers/{chantier}', [ChantierController::class, 'destroy'])->name('chantiers.destroy');
+    Route::post('/commandes', [CommandeController::class, 'store'])->name('commandes.store');
+    Route::put('/commandes/{commande}', [CommandeController::class, 'update'])->name('commandes.update');
+    Route::patch('/commandes/{commande}/confirmer', [CommandeController::class, 'confirmer'])->name('commandes.confirmer');
+    Route::patch('/commandes/{commande}/preparer', [CommandeController::class, 'preparer'])->name('commandes.preparer');
+    Route::patch('/commandes/{commande}/annuler', [CommandeController::class, 'annuler'])->name('commandes.annuler');
 });
 
     // Administration
