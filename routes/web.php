@@ -12,6 +12,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\MouvementController;
 use App\Http\Controllers\ChantierController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DemandeController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -25,6 +26,7 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
 
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
     Route::get('/chantiers', [ChantierController::class, 'index'])->name('chantiers.index');
+    Route::get('/demandes', [DemandeController::class, 'index'])->name('demandes.index');
 
     Route::middleware('role:admin,gestionnaire,chantier')->group(function () {
     Route::post('/chantiers', [ChantierController::class, 'store'])->name('chantiers.store');
@@ -62,6 +64,19 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     // Administration
     Route::middleware('role:admin')->group(function () {
         // Route::resource('/utilisateurs', ...)
+    });
+
+    Route::middleware('role:admin,chantier')->group(function () {
+        Route::post('/demandes', [DemandeController::class, 'store'])->name('demandes.store');
+    });
+
+    Route::middleware('role:admin,controle')->group(function () {
+        Route::patch('/demandes/{demande}/approuver', [DemandeController::class, 'approuver'])->name('demandes.approuver');
+        Route::patch('/demandes/{demande}/refuser', [DemandeController::class, 'refuser'])->name('demandes.refuser');
+    });
+
+    Route::middleware('role:admin,gestionnaire')->group(function () {
+        Route::patch('/demandes/{demande}/preparer', [DemandeController::class, 'preparer'])->name('demandes.preparer');
     });
 });
 

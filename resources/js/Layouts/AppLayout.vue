@@ -4,7 +4,7 @@ import { Link, usePage } from '@inertiajs/vue3'
 import {
   LayoutDashboard, Package, Boxes, ArrowLeftRight, Factory, Users,
   HardHat, ClipboardList, Truck, UserCog, LogOut, Search, Bell, Box,
-  Tags, Warehouse,
+  Tags, Warehouse, FileText,
 } from 'lucide-vue-next'
 
 const user = computed(() => usePage().props.auth.user)
@@ -24,6 +24,7 @@ const menu = [
   { label: 'Fournisseurs', route: 'fournisseurs.index', icon: Factory, roles: ['admin', 'gestionnaire'] },
   { label: 'Clients', route: 'clients.index', icon: Users, roles: lecture },
   { label: 'Chantiers', route: 'chantiers.index', icon: HardHat, roles: all },
+  { label: 'Demandes', route: 'demandes.index', icon: FileText, roles: all },
   { label: 'Commandes', route: 'commandes.index', icon: ClipboardList, roles: lecture },
   { label: 'Livraisons', route: 'livraisons.index', icon: Truck, roles: lecture },
   { label: 'Utilisateurs', route: 'users.index', icon: UserCog, roles: ['admin'] },
@@ -103,8 +104,8 @@ const isActive = (item) => route().has(item.route) && route().current(item.route
         <div v-if="flash.success" class="mb-4 rounded-xl bg-emerald-100 px-4 py-3 text-sm text-emerald-800">
   {{ flash.success }}
 </div>
-<div v-if="errors.suppression" class="mb-4 rounded-xl bg-red-100 px-4 py-3 text-sm text-red-800">
-  {{ errors.suppression }}
+<div v-if="errors.suppression || errors.statut" class="mb-4 rounded-xl bg-red-100 px-4 py-3 text-sm text-red-800">
+  {{ errors.suppression ?? errors.statut }}
 </div>
         <slot />
       </main>
