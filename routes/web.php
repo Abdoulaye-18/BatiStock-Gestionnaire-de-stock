@@ -14,6 +14,8 @@ use App\Http\Controllers\ChantierController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\CommandeController;
+use App\Http\Controllers\LivraisonController;
+use App\Http\Controllers\LivreurController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -42,6 +44,8 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::get('/mouvements', [MouvementController::class, 'index'])->name('mouvements.index');
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::get('/commandes', [CommandeController::class, 'index'])->name('commandes.index');
+    Route::get('/livraisons', [LivraisonController::class, 'index'])->name('livraisons.index');
+    Route::get('/livreurs', [LivreurController::class, 'index'])->name('livreurs.index');
 });
 
     // Écriture sur le stock : gestionnaire, admin
@@ -66,6 +70,10 @@ Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,control
     Route::patch('/commandes/{commande}/confirmer', [CommandeController::class, 'confirmer'])->name('commandes.confirmer');
     Route::patch('/commandes/{commande}/preparer', [CommandeController::class, 'preparer'])->name('commandes.preparer');
     Route::patch('/commandes/{commande}/annuler', [CommandeController::class, 'annuler'])->name('commandes.annuler');
+    Route::post('/livraisons', [LivraisonController::class, 'store'])->name('livraisons.store');
+    Route::patch('/livraisons/{livraison}/demarrer', [LivraisonController::class, 'demarrer'])->name('livraisons.demarrer');
+    Route::patch('/livraisons/{livraison}/confirmer', [LivraisonController::class, 'confirmer'])->name('livraisons.confirmer');
+    Route::resource('livreurs', LivreurController::class)->only(['store', 'update', 'destroy']);
 });
 
     // Administration

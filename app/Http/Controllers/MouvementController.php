@@ -14,6 +14,7 @@ use App\Models\StockArticle;
 use App\Services\MouvementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Livraison;
 
 class MouvementController extends Controller
 {
@@ -48,6 +49,9 @@ class MouvementController extends Controller
                 'utilisateur' => $m->user->name,
                 'fournisseur' => $m->fournisseur?->nom,
                 'transfert' => $m->id_transfert ? substr($m->id_transfert, 0, 8) : null,
+                'origine' => $m->origine_type === 'livraison'
+                    ? Livraison::whereKey($m->origine_id)->value('numero')
+                    : null,
             ]);
 
         return Inertia::render('Mouvements/Index', [

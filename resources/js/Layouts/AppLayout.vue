@@ -4,7 +4,7 @@ import { Link, usePage } from '@inertiajs/vue3'
 import {
   LayoutDashboard, Package, Boxes, ArrowLeftRight, Factory, Users,
   HardHat, ClipboardList, Truck, UserCog, LogOut, Search, Bell, Box,
-  Tags, Warehouse, FileText,
+  Tags, Warehouse, FileText, Contact,
 } from 'lucide-vue-next'
 
 const user = computed(() => usePage().props.auth.user)
@@ -27,6 +27,7 @@ const menu = [
   { label: 'Demandes', route: 'demandes.index', icon: FileText, roles: all },
   { label: 'Commandes', route: 'commandes.index', icon: ClipboardList, roles: lecture },
   { label: 'Livraisons', route: 'livraisons.index', icon: Truck, roles: lecture },
+  { label: 'Livreurs', route: 'livreurs.index', icon: Contact, roles: lecture },
   { label: 'Utilisateurs', route: 'users.index', icon: UserCog, roles: ['admin'] },
 ]
 

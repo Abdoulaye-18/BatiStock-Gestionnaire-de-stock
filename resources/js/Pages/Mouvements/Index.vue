@@ -162,6 +162,7 @@ const signe = (q) => (q > 0 ? `+${q}` : `${q}`)
             <td class="px-3 py-3 text-xs text-slate-500">
               <span v-if="m.fournisseur">{{ m.fournisseur }}</span>
               <span v-else-if="m.transfert">Transfert #{{ m.transfert }}</span>
+              <span v-else-if="m.origine">Livraison {{ m.origine }}</span>
               <span v-else>-</span>
             </td>
           </tr>
