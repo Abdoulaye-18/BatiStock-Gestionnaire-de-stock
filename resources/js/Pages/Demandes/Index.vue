@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import { Plus, Eye, Trash2, Check, X, PackageCheck } from 'lucide-vue-next'
 import AppLayout from '@/Layouts/AppLayout.vue'
@@ -85,6 +85,13 @@ function agir(action, data = {}) {
     onError: (e) => (erreurAction.value = e.statut ?? e.motif_refus ?? 'Action impossible.'),
   })
 }
+
+onMounted(() => {
+  if (props.peutCreer && new URLSearchParams(window.location.search).get('ouvrir') === 'nouvelle') {
+    ouvrirCreation()
+    window.history.replaceState(window.history.state, '', window.location.pathname)
+  }
+})
 </script>
 
 <template>

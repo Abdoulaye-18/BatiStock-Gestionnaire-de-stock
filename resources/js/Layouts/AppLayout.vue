@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue'
-import { Link, usePage } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import {
   LayoutDashboard, Package, Boxes, ArrowLeftRight, Factory, Users,
   HardHat, ClipboardList, Truck, UserCog, LogOut, Search, Bell, Box,
@@ -13,6 +13,15 @@ const all = ['admin', 'gestionnaire', 'chantier', 'controle']
 const lecture = ['admin', 'gestionnaire', 'controle']
 const flash = computed(() => usePage().props.flash ?? {})
 const errors = computed(() => usePage().props.errors ?? {})
+const alertes = computed(() => usePage().props.alertes ?? 0)
+const recherche = ref('')
+const peutChercher = computed(() => user.value.role !== 'chantier')
+
+function chercher() {
+  if (recherche.value.trim()) {
+    router.get(route('articles.index'), { q: recherche.value.trim() })
+  }
+}
 
 const menu = [
   { label: 'Tableau de bord', route: 'dashboard', icon: LayoutDashboard, roles: all },
@@ -82,16 +91,25 @@ const isActive = (item) => route().has(item.route) && route().current(item.route
     <!-- Contenu -->
     <div class="flex-1 min-w-0">
       <header class="flex items-center justify-between gap-4 px-8 py-4">
-        <div class="relative w-full max-w-md">
-          <Search :size="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Rechercher un article, une commande, un client..."
-            class="w-full rounded-xl border-0 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:ring-2 focus:ring-blue-400"
-          />
+        <div class="relative w-full max-w-md" :class="{ invisible: !peutChercher }">
+  <Search :size="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+  <input
+    v-model="recherche"
+    @keyup.enter="chercher"
+    type="text"
+    placeholder="Rechercher un article..."
+    class="w-full rounded-xl border-0 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:ring-2 focus:ring-blue-400"
+  />
+</div>
         </div>
         <div class="flex items-center gap-5">
-          <Bell :size="20" class="text-slate-500" />
+          <Link v-if="alertes > 0" :href="route('articles.index', { statut: 'faible' })" class="relative" title="Articles en stock faible">
+  <Bell :size="20" class="text-slate-500" />
+  <span class="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+    {{ alertes }}
+  </span>
+</Link>
+<Bell v-else :size="20" class="text-slate-500" />
           <div class="flex items-center gap-2">
             <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
               {{ user.name.charAt(0).toUpperCase() }}

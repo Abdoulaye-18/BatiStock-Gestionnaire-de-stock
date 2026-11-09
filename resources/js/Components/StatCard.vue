@@ -1,10 +1,13 @@
 <script setup>
+import { Link } from '@inertiajs/vue3'
+
 defineProps({
   title: String,
   value: [String, Number],
   subtitle: String,
   icon: Object,
   color: { type: String, default: 'blue' },
+  href: String,
 })
 
 const colors = {
@@ -17,14 +20,16 @@ const colors = {
 </script>
 
 <template>
-  <div class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm">
+  <component :is="href ? Link : 'div'" :href="href"
+    class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm transition"
+    :class="href ? 'hover:shadow-md' : ''">
     <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl" :class="colors[color]">
       <component :is="icon" :size="26" />
     </div>
-    <div>
-      <p class="text-sm text-slate-500">{{ title }}</p>
+    <div class="min-w-0">
+      <p class="truncate text-sm text-slate-500">{{ title }}</p>
       <p class="text-3xl font-bold text-blue-950">{{ value }}</p>
-      <p class="text-xs text-slate-400">{{ subtitle }}</p>
+      <p class="truncate text-xs text-slate-400">{{ subtitle }}</p>
     </div>
-  </div>
+  </component>
 </template>

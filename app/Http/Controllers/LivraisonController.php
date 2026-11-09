@@ -74,7 +74,7 @@ class LivraisonController extends Controller
 
     public function store(LivraisonRequest $request)
     {
-        $this->service->planifier($request->validated(), $request->user());
+        $this->service->planifier($request->validated());
 
         return back()->with('success', 'Livraison planifiée.');
     }

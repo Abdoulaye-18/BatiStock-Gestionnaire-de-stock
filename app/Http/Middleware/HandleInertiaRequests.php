@@ -41,6 +41,9 @@ class HandleInertiaRequests extends Middleware
 'flash' => [
     'success' => fn () => $request->session()->get('success'),
 ],
+'alertes' => fn () => $request->user()?->hasRole('admin', 'gestionnaire', 'controle')
+    ? \App\Models\Article::where('actif', true)->sousSeuil()->count()
+    : 0,
         ];
     }
 }

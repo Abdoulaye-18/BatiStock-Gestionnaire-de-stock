@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import { Plus, Eye, Trash2, Search, Play, PackageCheck } from 'lucide-vue-next'
 import AppLayout from '@/Layouts/AppLayout.vue'
@@ -160,6 +160,13 @@ function confirmer() {
 }
 
 const peutAgir = computed(() => props.peutModifier && ['planifiee', 'en_cours'].includes(detail.value?.statut))
+
+onMounted(() => {
+  if (props.peutModifier && new URLSearchParams(window.location.search).get('ouvrir') === 'nouvelle') {
+    ouvrirPlanification()
+    window.history.replaceState(window.history.state, '', window.location.pathname)
+  }
+})
 </script>
 
 <template>

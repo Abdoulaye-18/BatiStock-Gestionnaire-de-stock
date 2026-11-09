@@ -61,7 +61,7 @@ class LivraisonService
         return $sources;
     }
 
-    public function planifier(array $data, $user): Livraison
+    public function planifier(array $data): Livraison
     {
         return DB::transaction(function () use ($data) {
             $type = $data['source_type'];

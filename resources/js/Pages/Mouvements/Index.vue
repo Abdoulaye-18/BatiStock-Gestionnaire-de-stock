@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, onMounted } from 'vue'
 import { Head, useForm, router } from '@inertiajs/vue3'
 import { ArrowDownToLine, ArrowUpFromLine, SlidersHorizontal, ArrowLeftRight, Search } from 'lucide-vue-next'
 import AppLayout from '@/Layouts/AppLayout.vue'
@@ -92,6 +92,14 @@ const disponible = computed(() => {
 })
 
 const signe = (q) => (q > 0 ? `+${q}` : `${q}`)
+
+onMounted(() => {
+  const mode = new URLSearchParams(window.location.search).get('ouvrir')
+  if (props.peutModifier && modes[mode]) {
+    ouvrir(mode)
+    window.history.replaceState(window.history.state, '', window.location.pathname)
+  }
+})
 </script>
 
 <template>
