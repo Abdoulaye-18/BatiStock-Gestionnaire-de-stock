@@ -44,6 +44,18 @@ class HandleInertiaRequests extends Middleware
 'alertes' => fn () => $request->user()?->hasRole('admin', 'gestionnaire', 'controle')
     ? \App\Models\Article::where('actif', true)->sousSeuil()->count()
     : 0,
+
+'notifications' => fn () => $request->user() ? [
+    'non_lues' => $request->user()->unreadNotifications()->count(),
+    'recentes' => $request->user()->notifications()->latest()->take(8)->get()->map(fn ($n) => [
+        'id' => $n->id,
+        'titre' => $n->data['titre'] ?? '',
+        'message' => $n->data['message'] ?? '',
+        'lu' => $n->read_at !== null,
+        'date' => $n->created_at->diffForHumans(),
+    ]),
+] : null,
         ];
+
     }
 }

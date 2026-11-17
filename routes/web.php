@@ -17,6 +17,7 @@ use App\Http\Controllers\CommandeController;
 use App\Http\Controllers\LivraisonController;
 use App\Http\Controllers\LivreurController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -29,6 +30,8 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'role:admin,gestionnaire,chantier,controle'])->group(function () {
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::patch('/notifications/lues', [NotificationController::class, 'toutLire'])->name('notifications.lues');
+    Route::patch('/notifications/{id}/lue', [NotificationController::class, 'lire'])->name('notifications.lire');
     Route::get('/chantiers', [ChantierController::class, 'index'])->name('chantiers.index');
     Route::get('/demandes', [DemandeController::class, 'index'])->name('demandes.index');
 

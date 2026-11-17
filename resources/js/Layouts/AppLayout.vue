@@ -1,11 +1,12 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import {
   LayoutDashboard, Package, Boxes, ArrowLeftRight, Factory, Users,
-  HardHat, ClipboardList, Truck, UserCog, LogOut, Search, Bell, Box,
+  HardHat, ClipboardList, Truck, UserCog, LogOut, Search, Bell,
   Tags, Warehouse, FileText, Contact,
 } from 'lucide-vue-next'
+
 
 const user = computed(() => usePage().props.auth.user)
 
@@ -44,6 +45,15 @@ const visibleMenu = computed(() => menu.filter((m) => m.roles.includes(user.valu
 
 const href = (item) => (route().has(item.route) ? route(item.route) : '#')
 const isActive = (item) => route().has(item.route) && route().current(item.route.replace('.index', '.*'))
+const notifs = computed(() => usePage().props.notifications ?? { non_lues: 0, recentes: [] })
+const ouvert = ref(false)
+
+// Rafraîchit la cloche toutes les 15 secondes, sans recharger la page
+let minuteur
+onMounted(() => {
+  minuteur = setInterval(() => router.reload({ only: ['notifications', 'alertes'] }), 15000)
+})
+onUnmounted(() => clearInterval(minuteur))
 </script>
 
 <template>
@@ -53,22 +63,16 @@ const isActive = (item) => route().has(item.route) && route().current(item.route
       class="hidden md:flex w-64 shrink-0 flex-col p-4 sticky top-0 h-screen"
       style="background: linear-gradient(180deg, #dbeafe 0%, #93c5fd 55%, #60a5fa 100%)"
     >
-      <div class="flex items-center gap-3 px-2 py-3 mb-4">
-        <div class="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white">
-          <Box :size="22" />
-        </div>
-        <div>
-          <p class="text-lg font-bold text-blue-950 leading-tight">BatiStock</p>
-          <p class="text-[11px] text-blue-900/70 leading-tight">Gestion des stocks &amp; livraisons</p>
-        </div>
+      <div class="pt-3 pb-2 mb-2">
+        <img src="/images/logo.png" alt="BatiStock" class="w-4/5 h-auto object-contain max-h-14" />
       </div>
 
-      <nav class="flex-1 space-y-1 overflow-y-auto">
+      <nav class="flex-1 space-y-0.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <Link
           v-for="item in visibleMenu"
           :key="item.label"
           :href="href(item)"
-          class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition"
+          class="flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition"
           :class="isActive(item)
             ? 'bg-white text-blue-700 shadow-sm'
             : 'text-blue-950/80 hover:bg-white/50'"
@@ -92,24 +96,53 @@ const isActive = (item) => route().has(item.route) && route().current(item.route
     <div class="flex-1 min-w-0">
       <header class="flex items-center justify-between gap-4 px-8 py-4">
         <div class="relative w-full max-w-md" :class="{ invisible: !peutChercher }">
-  <Search :size="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-  <input
-    v-model="recherche"
-    @keyup.enter="chercher"
-    type="text"
-    placeholder="Rechercher un article..."
-    class="w-full rounded-xl border-0 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:ring-2 focus:ring-blue-400"
-  />
-</div>
+          <Search :size="16" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            v-model="recherche"
+            @keyup.enter="chercher"
+            type="text"
+            placeholder="Rechercher un article..."
+            class="w-full rounded-xl border-0 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:ring-2 focus:ring-blue-400"
+          />
         </div>
         <div class="flex items-center gap-5">
-          <Link v-if="alertes > 0" :href="route('articles.index', { statut: 'faible' })" class="relative" title="Articles en stock faible">
-  <Bell :size="20" class="text-slate-500" />
-  <span class="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
-    {{ alertes }}
-  </span>
-</Link>
-<Bell v-else :size="20" class="text-slate-500" />
+          <div class="relative">
+            <button type="button" @click="ouvert = !ouvert" class="relative" title="Notifications">
+              <Bell :size="20" class="text-slate-500" />
+              <span v-if="notifs.non_lues > 0"
+                class="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                {{ notifs.non_lues }}
+              </span>
+            </button>
+
+            <div v-if="ouvert" class="fixed inset-0 z-40" @click="ouvert = false"></div>
+            <div v-if="ouvert" class="absolute right-0 z-50 mt-3 w-80 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-100">
+              <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+                <p class="text-sm font-semibold text-blue-950">Notifications</p>
+                <Link v-if="notifs.non_lues > 0" :href="route('notifications.lues')" method="patch" as="button" preserve-scroll
+                  class="text-xs font-medium text-blue-600 hover:underline">
+                  Tout marquer comme lu
+                </Link>
+              </div>
+
+              <ul class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                <li v-for="n in notifs.recentes" :key="n.id">
+                  <Link :href="route('notifications.lire', n.id)" method="patch" as="button" @click="ouvert = false"
+                    class="block w-full px-4 py-3 text-left hover:bg-slate-50" :class="n.lu ? '' : 'bg-blue-50/60'">
+                    <p class="text-sm" :class="n.lu ? 'text-slate-600' : 'font-semibold text-blue-950'">{{ n.titre }}</p>
+                    <p class="text-xs text-slate-500">{{ n.message }}</p>
+                    <p class="mt-1 text-[11px] text-slate-400">{{ n.date }}</p>
+                  </Link>
+                </li>
+                <li v-if="!notifs.recentes.length" class="px-4 py-6 text-center text-sm text-slate-400">Aucune notification.</li>
+              </ul>
+
+              <Link v-if="alertes > 0" :href="route('articles.index', { statut: 'faible' })" @click="ouvert = false"
+                class="block border-t border-slate-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ alertes }} article(s) en stock faible
+              </Link>
+            </div>
+          </div>
           <div class="flex items-center gap-2">
             <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
               {{ user.name.charAt(0).toUpperCase() }}

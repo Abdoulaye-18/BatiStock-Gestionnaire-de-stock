@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import {
   Package, Boxes, ShoppingCart, FileText, Truck, TriangleAlert, HardHat, PackageCheck,
-  ArrowDownToLine, ArrowUpFromLine, ArrowRight, Clock, TrendingUp, Layers,
+  ArrowDownToLine, ArrowUpFromLine, ArrowRight, Clock, TrendingUp, Layers, BellRing,
 } from 'lucide-vue-next'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import StatCard from '@/Components/StatCard.vue'
@@ -16,6 +16,7 @@ const props = defineProps({
   vue: String,
   donnees: Object,
   actions: Array,
+  aTraiter: Array,
 })
 
 const iconesKpi = {
@@ -74,6 +75,17 @@ const totalCategories = computed(() => (props.donnees.categories ?? []).reduce((
     </div>
 
     <!-- Indicateurs -->
+    <div v-if="aTraiter?.length" class="mb-6 flex flex-wrap gap-3">
+      <Link v-for="t in aTraiter" :key="t.label" :href="t.href"
+        class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium shadow-sm transition hover:shadow-md"
+        :class="t.couleur === 'orange' ? 'bg-orange-50 text-orange-800' : 'bg-blue-50 text-blue-800'">
+        <BellRing :size="18" />
+        {{ t.label }}
+        <ArrowRight :size="14" />
+      </Link>
+    </div>
+
+    <!-- Indicateurs KPI -->
     <div class="grid gap-4" :class="gridKpi">
       <StatCard v-for="k in donnees.kpis" :key="k.titre"
         :title="k.titre" :value="fmt(k.valeur)" :subtitle="k.sous_titre"

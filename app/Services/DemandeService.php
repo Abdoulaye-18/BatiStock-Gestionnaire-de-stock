@@ -8,6 +8,8 @@ use App\Support\Journal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\NotificationDemande;
+use Illuminate\Support\Facades\Notification;
 
 class DemandeService
 {
@@ -39,26 +41,30 @@ class DemandeService
     }
 
     public function approuver(DemandeChantier $demande, User $validateur): void
-    {
-        DB::transaction(function () use ($demande, $validateur) {
-            $d = $this->verrouiller($demande, 'en_attente');
-            $this->verifierSeparation($d, $validateur);
+{
+    DB::transaction(function () use ($demande, $validateur) {
+        $d = $this->verrouiller($demande, 'en_attente');
+        $this->verifierSeparation($d, $validateur);
 
-            $d->update(['statut' => 'approuvee', 'validateur_id' => $validateur->id, 'motif_refus' => null]);
-            Journal::log('demande_approuvee', 'demande', $d->id, $d->numero);
-        });
-    }
+        $d->update(['statut' => 'approuvee', 'validateur_id' => $validateur->id, 'motif_refus' => null]);
+        Journal::log('demande_approuvee', 'demande', $d->id, $d->numero);
 
-    public function refuser(DemandeChantier $demande, User $validateur, string $motif): void
-    {
-        DB::transaction(function () use ($demande, $validateur, $motif) {
-            $d = $this->verrouiller($demande, 'en_attente');
-            $this->verifierSeparation($d, $validateur);
+        $this->notifierApprobation($d, $validateur);
+    });
+}
 
-            $d->update(['statut' => 'refusee', 'validateur_id' => $validateur->id, 'motif_refus' => $motif]);
-            Journal::log('demande_refusee', 'demande', $d->id, "{$d->numero} : {$motif}");
-        });
-    }
+public function refuser(DemandeChantier $demande, User $validateur, string $motif): void
+{
+    DB::transaction(function () use ($demande, $validateur, $motif) {
+        $d = $this->verrouiller($demande, 'en_attente');
+        $this->verifierSeparation($d, $validateur);
+
+        $d->update(['statut' => 'refusee', 'validateur_id' => $validateur->id, 'motif_refus' => $motif]);
+        Journal::log('demande_refusee', 'demande', $d->id, "{$d->numero} : {$motif}");
+
+        $d->demandeur->notify(new NotificationDemande($d, 'refusee', $validateur));
+    });
+}
 
     public function preparer(DemandeChantier $demande): void
     {
@@ -114,4 +120,15 @@ class DemandeService
             ]);
         }
     }
+
+    /** Gestionnaires actifs : « à préparer » ; demandeur : « approuvée ». */
+private function notifierApprobation(DemandeChantier $d, User $validateur): void
+{
+    $gestionnaires = User::where('actif', true)
+        ->whereHas('role', fn ($q) => $q->where('code', 'gestionnaire'))
+        ->get();
+
+    Notification::send($gestionnaires, new NotificationDemande($d, 'a_preparer', $validateur));
+    $d->demandeur->notify(new NotificationDemande($d, 'approuvee', $validateur));
+}
 }
